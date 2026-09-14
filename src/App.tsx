@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState, useRef } from 'react'
+import { Suspense, lazy, useEffect, useState, useRef, useCallback } from 'react'
 import './App.css'
 import SmoothScroll from './SmoothScroll'
 import gsap from 'gsap'
@@ -6,7 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
-// Lazy load 3D scenes - fallback to static if WebGL unavailable
+// Lazy load 3D scenes
 const HeroScene = lazy(() => import('./scenes/HeroScene'))
 const BookScene = lazy(() => import('./scenes/BookScene'))
 const PillarScene = lazy(() => import('./scenes/PillarScene'))
@@ -23,7 +23,6 @@ function detectWebGL(): boolean {
   }
 }
 
-// Static fallback when WebGL is off
 function StaticFallback() {
   return (
     <div className="fallback-hero">
@@ -41,29 +40,40 @@ function LoadingSpinner() {
   )
 }
 
-/** Scroll progress bar at top of page */
+/** Scroll progress bar */
 function ScrollProgressBar() {
   const barRef = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
     const onScroll = () => {
       if (!barRef.current) return
       const scrollTop = window.scrollY
       const docHeight = document.documentElement.scrollHeight - window.innerHeight
-      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
-      barRef.current.style.width = `${progress}%`
+      barRef.current.style.width = `${docHeight > 0 ? (scrollTop / docHeight) * 100 : 0}%`
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
   return <div className="scroll-progress-bar" ref={barRef} />
+}
+
+/** Cursor glow that follows mouse */
+function CursorGlow() {
+  const glowRef = useRef<HTMLDivElement>(null)
+  const onMove = useCallback((e: MouseEvent) => {
+    if (glowRef.current) {
+      glowRef.current.style.transform = `translate(${e.clientX - 150}px, ${e.clientY - 150}px)`
+    }
+  }, [])
+  useEffect(() => {
+    window.addEventListener('mousemove', onMove, { passive: true })
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [onMove])
+  return <div className="cursor-glow" ref={glowRef} />
 }
 
 /** Animated number counter */
 function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null)
-
   useEffect(() => {
     if (!ref.current) return
     const ctx = gsap.context(() => {
@@ -78,9 +88,7 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
             duration: 1.5,
             ease: 'power2.out',
             onUpdate: () => {
-              if (ref.current) {
-                ref.current.textContent = `${Math.round(obj.val)}${suffix}`
-              }
+              if (ref.current) ref.current.textContent = `${Math.round(obj.val)}${suffix}`
             }
           })
         }
@@ -88,33 +96,90 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
     })
     return () => ctx.revert()
   }, [target, suffix])
-
   return <span ref={ref}>0{suffix}</span>
+}
+
+/** Stagger text reveal for hero title */
+function useStaggerReveal(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    if (!ref.current) return
+    const children = ref.current.querySelectorAll('.title-line')
+    const ctx = gsap.context(() => {
+      gsap.fromTo(children,
+        { opacity: 0, y: 30, rotateX: 40 },
+        {
+          opacity: 1, y: 0, rotateX: 0,
+          duration: 0.9,
+          stagger: 0.15,
+          ease: 'power3.out',
+          delay: 0.3,
+        }
+      )
+    })
+    return () => ctx.revert()
+  }, [ref])
+}
+
+/** Stagger reveal for slogan + CTA */
+function useHeroContentReveal(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    if (!ref.current) return
+    const slogan = ref.current.querySelector('.hero-slogan')
+    const cta = ref.current.querySelector('.cta-btn')
+    const ctx = gsap.context(() => {
+      gsap.fromTo([slogan, cta],
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1, y: 0,
+          duration: 0.7,
+          stagger: 0.2,
+          ease: 'power2.out',
+          delay: 0.9,
+        }
+      )
+    })
+    return () => ctx.revert()
+  }, [ref])
 }
 
 export default function App() {
   const [hasWebGL, setHasWebGL] = useState(true)
+  const titleRef = useRef<HTMLHeadingElement>(null)
+  const heroRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setHasWebGL(detectWebGL())
   }, [])
 
-  // Scroll reveal animations for sections
+  // Hero text stagger
+  useStaggerReveal(titleRef)
+  useHeroContentReveal(heroRef)
+
+  // Scroll reveal for sections
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>('.reveal').forEach((el) => {
         gsap.fromTo(el,
-          { opacity: 0, y: 40 },
+          { opacity: 0, y: 50 },
           {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
+            opacity: 1, y: 0,
+            duration: 0.9,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 85%', once: true }
+          }
+        )
+      })
+
+      // Stagger pillar cards
+      gsap.utils.toArray<HTMLElement>('.pillar-card').forEach((card, i) => {
+        gsap.fromTo(card,
+          { opacity: 0, y: 40, scale: 0.95 },
+          {
+            opacity: 1, y: 0, scale: 1,
+            duration: 0.7,
+            delay: i * 0.15,
             ease: 'power2.out',
-            scrollTrigger: {
-              trigger: el,
-              start: 'top 85%',
-              once: true,
-            }
+            scrollTrigger: { trigger: card, start: 'top 85%', once: true }
           }
         )
       })
@@ -126,8 +191,9 @@ export default function App() {
     <SmoothScroll>
       <div className="app">
         <ScrollProgressBar />
+        <CursorGlow />
 
-        {/* SCENE 1: Hero — Book compass + stars + gradient shader bg */}
+        {/* HERO */}
         <section className="scene scene-hero" id="hero">
           <div className="canvas-container">
             {hasWebGL ? (
@@ -138,8 +204,8 @@ export default function App() {
               <StaticFallback />
             )}
           </div>
-          <div className="hero-overlay reveal">
-            <h1 className="hero-title">
+          <div className="hero-overlay" ref={heroRef}>
+            <h1 className="hero-title" ref={titleRef}>
               <span className="title-line">Trạm</span>
               <span className="title-line">Ghé</span>
               <span className="title-line">Tâm Hồn</span>
@@ -147,9 +213,10 @@ export default function App() {
             <p className="hero-slogan">Không ôm sách, chỉ lấy ý sách mà dùng.</p>
             <a href="#pillars" className="cta-btn">Khám phá →</a>
           </div>
+          <div className="section-fade-bottom" />
         </section>
 
-        {/* SCENE 2: 3 Pillars — Tiền, Con người, Phá giới hạn */}
+        {/* PILLARS */}
         <section className="scene scene-pillars" id="pillars">
           <div className="canvas-container">
             {hasWebGL ? (
@@ -178,9 +245,10 @@ export default function App() {
               </div>
             </div>
           </div>
+          <div className="section-fade-bottom" />
         </section>
 
-        {/* SCENE 3: Book Showcase — Sapiens series */}
+        {/* BOOK */}
         <section className="scene scene-book" id="books">
           <div className="canvas-container">
             {hasWebGL ? (
@@ -206,9 +274,10 @@ export default function App() {
               </div>
             </div>
           </div>
+          <div className="section-fade-bottom" />
         </section>
 
-        {/* SCENE 4: About — Who is Hùng */}
+        {/* ABOUT */}
         <section className="scene scene-about" id="about">
           <div className="about-content reveal">
             <h2>Mình là ai?</h2>
@@ -228,7 +297,7 @@ export default function App() {
           </div>
         </section>
 
-        {/* Footer */}
+        {/* FOOTER */}
         <footer className="site-footer reveal">
           <p>Trạm Ghé Tâm Hồn · Không ôm sách, chỉ lấy ý sách mà dùng.</p>
           <div className="social-links">

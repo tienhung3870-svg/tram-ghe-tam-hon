@@ -25,7 +25,7 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--navy);
   color: var(--cream);
 }
@@ -150,11 +150,6 @@ h1, h2, h3, p {
   align-items: center;
   gap: 0.1rem;
   width: 100%;
-}
-
-.title-line {
-  display: block;
-  line-height: 1.1;
 }
 
 .hero-slogan {
@@ -409,6 +404,78 @@ h1, h2, h3, p {
   transform: translateY(40px);
 }
 
+/* ═══ CURSOR GLOW ═══ */
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(201, 168, 124, 0.06) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  will-change: transform;
+  mix-blend-mode: screen;
+}
+
+/* ═══ SECTION FADE TRANSITIONS ═══ */
+.section-fade-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to bottom, transparent, var(--navy));
+  pointer-events: none;
+  z-index: 3;
+}
+
+.scene-book .section-fade-bottom {
+  background: linear-gradient(to bottom, transparent, #151525);
+}
+
+/* ═══ HERO TITLE STAGGER PERSPECTIVE ═══ */
+.hero-title {
+  perspective: 600px;
+}
+
+.title-line {
+  display: block;
+  line-height: 1.1;
+  opacity: 0; /* GSAP will animate this */
+  transform-origin: center bottom;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.hero-slogan {
+  opacity: 0; /* GSAP will animate */
+}
+
+.hero-overlay .cta-btn {
+  opacity: 0; /* GSAP will animate */
+}
+
+/* ═══ PILLAR CARD initial state for stagger ═══ */
+.pillar-card {
+  opacity: 0;
+  transform: translateY(40px) scale(0.95);
+}
+
+/* ═══ NOISE OVERLAY (subtle film grain) ═══ */
+.app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+}
+
 /* ═══ RESPONSIVE DESKTOP ═══ */
 @media (min-width: 768px) {
   .hero-title {
@@ -423,5 +490,16 @@ h1, h2, h3, p {
   }
   .pillars-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+  .cursor-glow {
+    width: 400px;
+    height: 400px;
+  }
+}
+
+/* ═══ MOBILE: hide cursor glow (no mouse) ═══ */
+@media (hover: none) {
+  .cursor-glow {
+    display: none;
   }
 }
