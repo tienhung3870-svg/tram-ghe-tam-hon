@@ -1,7 +1,9 @@
-import { useRef } from 'react'
+import { useRef, Suspense, lazy } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Stars } from '@react-three/drei'
 import * as THREE from 'three'
+
+const StarField = lazy(() => import('./StarField'))
+const GradientBg = lazy(() => import('./GradientBg'))
 
 function Compass() {
   const groupRef = useRef<THREE.Group>(null)
@@ -43,13 +45,31 @@ function Compass() {
   )
 }
 
+/** Camera lerp: follows mouse ±3° for 2.5D parallax depth effect */
+function ParallaxCamera() {
+  useFrame((state) => {
+    const { mouse, camera } = state
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mouse.x * 0.5, 0.05)
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, mouse.y * 0.3, 0.05)
+    camera.lookAt(0, 0, 0)
+  })
+  return null
+}
+
 export default function HeroScene() {
   return (
     <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-      <color attach="background" args={['#1a1a2e']} />
+      {/* Gradient background shader */}
+      <Suspense fallback={null}>
+        <GradientBg />
+      </Suspense>
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1} color="#c9a87c" />
-      <Stars radius={100} depth={50} count={500} factor={4} saturation={0} fade speed={0.5} />
+      <ParallaxCamera />
+      {/* Custom star particles replacing drei Stars */}
+      <Suspense fallback={null}>
+        <StarField count={1500} />
+      </Suspense>
       <Compass />
     </Canvas>
   )

@@ -49,6 +49,17 @@ function FloatingBook() {
   )
 }
 
+/** Camera lerp: follows mouse ±3° for 2.5D parallax */
+function ParallaxCamera() {
+  useFrame((state) => {
+    const { mouse, camera } = state
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mouse.x * 0.3, 0.05)
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, mouse.y * 0.2, 0.05)
+    camera.lookAt(0, 0, 0)
+  })
+  return null
+}
+
 export default function BookScene() {
   return (
     <Canvas camera={{ position: [0, 0, 5], fov: 45 }} shadows>
@@ -61,6 +72,7 @@ export default function BookScene() {
         castShadow 
         color="#c9a87c" 
       />
+      <ParallaxCamera />
       <FloatingBook />
     </Canvas>
   )

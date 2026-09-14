@@ -20,6 +20,17 @@ function FloatingShape({ position, geometry, color, speed }: { position: [number
   )
 }
 
+/** Camera lerp: follows mouse ±3° for 2.5D parallax */
+function ParallaxCamera() {
+  useFrame((state) => {
+    const { mouse, camera } = state
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mouse.x * 0.4, 0.05)
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, mouse.y * 0.2, 0.05)
+    camera.lookAt(0, 0, 0)
+  })
+  return null
+}
+
 export default function PillarScene() {
   const icoGeo = new THREE.IcosahedronGeometry(1)
   const octaGeo = new THREE.OctahedronGeometry(1)
@@ -27,6 +38,7 @@ export default function PillarScene() {
 
   return (
     <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
+      <ParallaxCamera />
       {/* Left: Money - Icosahedron */}
       <FloatingShape position={[-3, 0, 0]} geometry={icoGeo} color="#c9a87c" speed={0.2} />
       
