@@ -4,24 +4,30 @@
   left: 0;
   width: 6px;
   height: 6px;
-  background-color: var(--gold);
+  background-color: var(--gold, #c9a87c);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 99999;
   transform: translate(-50%, -50%);
-  mix-blend-mode: difference;
 }
 
 .cursor-circle {
   position: fixed;
   top: 0;
   left: 0;
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgba(201, 168, 124, 0.5);
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(201, 168, 124, 0.4);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 9998;
+  z-index: 99998;
   transform: translate(-50%, -50%);
-  transition: opacity 0.3s ease;
+  transition: transform 0.1s ease-out, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+@media (pointer: coarse) {
+  .cursor-dot,
+  .cursor-circle {
+    display: none !important;
+  }
 }

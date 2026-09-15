@@ -1,23 +1,37 @@
 .marquee-container {
   width: 100%;
   overflow: hidden;
-  background: var(--gold);
-  color: #111;
+  background: rgba(26, 26, 46, 0.6);
+  border-top: 1px solid rgba(201, 168, 124, 0.15);
+  border-bottom: 1px solid rgba(201, 168, 124, 0.15);
   padding: 1rem 0;
-  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
 }
 
 .marquee-track {
   display: flex;
-  width: 200%;
+  width: max-content;
+  will-change: transform;
 }
 
 .marquee-content {
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  width: 50%;
-  font-size: 2rem;
-  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+  color: var(--cream, #f5f0e8);
+  opacity: 0.75;
+}
+
+.marquee-bullet {
+  margin: 0 1.5rem;
+  color: var(--gold, #c9a87c);
 }

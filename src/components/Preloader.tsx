@@ -9,14 +9,17 @@ export default function Preloader() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (progress === 100) {
+    if (progress >= 100) {
       const ctx = gsap.context(() => {
         gsap.to(containerRef.current, {
           yPercent: -100,
           duration: 0.8,
           ease: 'power3.inOut',
-          delay: 0.5,
-          onComplete: () => { setMounted(false); ScrollTrigger.refresh(); }
+          delay: 0.2,
+          onComplete: () => {
+            setMounted(false)
+            ScrollTrigger.refresh()
+          }
         })
       })
       return () => ctx.revert()
@@ -26,7 +29,7 @@ export default function Preloader() {
   if (!mounted) return null
 
   return (
-    <div className="preloader" ref={containerRef}>
+    <div className="preloader" ref={containerRef} aria-hidden="true">
       <div className="preloader-content">
         <div className="preloader-number">{Math.round(progress)}%</div>
         <div className="preloader-bar">

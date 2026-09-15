@@ -1,30 +1,32 @@
 .preloader {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
-  height: 100vh;
-  background: #0f0f16;
-  z-index: 9999;
+  height: 100%;
+  background: var(--navy, #1a1a2e);
+  z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gold);
+  pointer-events: none;
 }
 
 .preloader-content {
-  text-align: center;
-  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .preloader-number {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
+  font-family: var(--mono, monospace);
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--gold, #c9a87c);
 }
 
 .preloader-bar {
-  width: 100%;
+  width: 200px;
   height: 2px;
   background: rgba(201, 168, 124, 0.2);
   border-radius: 2px;
@@ -33,6 +35,6 @@
 
 .preloader-bar-inner {
   height: 100%;
-  background: var(--gold);
-  transition: width 0.3s ease-out;
+  background: var(--gold, #c9a87c);
+  transition: width 0.1s linear;
 }
