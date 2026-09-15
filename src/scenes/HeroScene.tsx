@@ -1,7 +1,6 @@
 import { useRef, Suspense, lazy, useMemo, useEffect, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { heroProgress } from '../lib/scrollState'
 import { useIsMobile } from '../hooks/useIsMobile'
@@ -164,13 +163,6 @@ export default function HeroScene() {
           <StarField count={isMobile ? 500 : 1500} />
         </Suspense>
         <Compass />
-        
-        {!isMobile && (
-          <EffectComposer>
-            <Bloom luminanceThreshold={0.6} luminanceSmoothing={0.9} intensity={0.8} />
-            <Vignette eskil={false} offset={0.1} darkness={1.1} />
-          </EffectComposer>
-        )}
       </Canvas>
     </div>
   )
