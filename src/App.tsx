@@ -1,8 +1,7 @@
-import React, { useLayoutEffect, useRef, useState, lazy } from 'react'
+import React, { useLayoutEffect, useRef, useState, lazy, Suspense } from 'react'
 import { gsap, ScrollTrigger } from './lib/gsap'
 
 import SmoothScroll from './SmoothScroll'
-import Preloader from './components/Preloader'
 import Cursor from './components/Cursor'
 import Marquee from './components/Marquee'
 
@@ -15,7 +14,8 @@ import { siteContent } from './content/site'
 
 import './App.css'
 
-// Lazy load scenes
+// Lazy load scenes & heavy components
+const Preloader = lazy(() => import('./components/Preloader'))
 const HeroScene = lazy(() => import('./scenes/HeroScene'))
 const PillarScene = lazy(() => import('./scenes/PillarScene'))
 const BookScene = lazy(() => import('./scenes/BookScene'))
@@ -114,7 +114,9 @@ export default function App() {
 
   return (
     <SmoothScroll>
-      <Preloader />
+      <Suspense fallback={null}>
+        <Preloader />
+      </Suspense>
       <Cursor />
       <div className="app">
         <ScrollProgressBar />

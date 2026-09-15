@@ -1,4 +1,4 @@
-import React, { useRef, Suspense, useCallback } from 'react'
+import React, { useRef, useState, useEffect, Suspense, useCallback } from 'react'
 import { gsap, ScrollTrigger } from '../lib/gsap'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { useIsMobile } from '../hooks/useIsMobile'
@@ -48,13 +48,13 @@ function useStaggerReveal(ref: React.RefObject<HTMLElement | null>) {
     const lines = ref.current.querySelectorAll('.title-line')
     const ctx = gsap.context(() => {
       gsap.fromTo(lines,
-        { yPercent: 110 },
+        { yPercent: 50, opacity: 0.2 },
         {
           yPercent: 0,
-          duration: 0.8,
-          stagger: 0.08,
+          opacity: 1,
+          duration: 0.6,
+          stagger: 0.05,
           ease: 'power3.out',
-          delay: 0.2,
         }
       )
     })
@@ -71,14 +71,13 @@ function useHeroContentReveal(ref: React.RefObject<HTMLElement | null>) {
     const cta = ref.current.querySelector('.cta-btn')
     const ctx = gsap.context(() => {
       gsap.fromTo([slogan, cta],
-        { opacity: 0, y: 15 },
+        { opacity: 0.3, y: 10 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
-          stagger: 0.15,
+          duration: 0.5,
+          stagger: 0.1,
           ease: 'power2.out',
-          delay: 0.7,
         }
       )
     })
@@ -99,9 +98,51 @@ export default function Hero({ hasWebGL, HeroScene, LoadingSpinner, StaticFallba
   const heroRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
   const reducedMotion = useReducedMotion()
+  const [canLoad3D, setCanLoad3D] = useState(false)
 
   useStaggerReveal(titleRef)
   useHeroContentReveal(heroRef)
+
+  // Lazy import 3D scene after window load + IntersectionObserver so HTML/CTA paint first
+  useEffect(() => {
+    let isIntersecting = false
+    let isWindowLoaded = typeof document !== 'undefined' && document.readyState === 'complete'
+
+    const checkAndMount = () => {
+      if (isIntersecting && isWindowLoaded) {
+        setCanLoad3D(true)
+      }
+    }
+
+    const onLoad = () => {
+      isWindowLoaded = true
+      checkAndMount()
+    }
+
+    if (!isWindowLoaded) {
+      window.addEventListener('load', onLoad, { once: true })
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      isIntersecting = entry.isIntersecting
+      checkAndMount()
+    }, { rootMargin: '200px' })
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+
+    // Safety timeout in case window load already fired or takes too long
+    const timer = setTimeout(() => {
+      setCanLoad3D(true)
+    }, 1200)
+
+    return () => {
+      window.removeEventListener('load', onLoad)
+      observer.disconnect()
+      clearTimeout(timer)
+    }
+  }, [])
 
   // Pin hero 150vh scrub, disabled on mobile or reduced-motion
   React.useLayoutEffect(() => {
@@ -132,7 +173,7 @@ export default function Hero({ hasWebGL, HeroScene, LoadingSpinner, StaticFallba
   return (
     <section className="scene scene-hero" id="hero" ref={sectionRef}>
       <div className="canvas-container" aria-hidden="true">
-        {hasWebGL ? (
+        {hasWebGL && canLoad3D ? (
           <Suspense fallback={<LoadingSpinner />}>
             <HeroScene />
           </Suspense>
