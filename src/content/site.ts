@@ -55,17 +55,17 @@ export const siteContent = {
         id: "sapiens",
         title: "Sapiens — Lược sử loài người",
         author: "Yuval Noah Harari",
-        cover: "", // TODO-HUNG: Thêm link ảnh bìa
-        quote: "70.000 năm lịch sử gói trong 1 cuốn. Mình không kể lại sách — mình lấy ý, ghép với đời thật của các bạn, để các bạn thấy: mọi thứ đang tin đều có thể đặt câu hỏi lại.", // TODO-HUNG: Sửa lại quote cho chuẩn
-        why: "// TODO-HUNG: Viết 1 câu vì sao nên đọc cuốn này"
+        cover: "/covers/sapiens.jpg",
+        quote: "Tờ giấy trong ví bạn không tự nhiên lại có giá trị. Nó có giá vì tất cả cùng tin nó có giá — tiền là thứ không hề tồn tại ngoài trí tưởng tượng nhưng lại chi phối cả thế giới.",
+        why: "Nhìn thấu những trật tự tưởng tượng đang vận hành thế giới để các bạn tự do đặt câu hỏi lại mọi niềm tin cũ."
       },
       {
         id: "money-psychology",
         title: "Tâm Lý Học Về Tiền",
         author: "Morgan Housel",
-        cover: "", // TODO-HUNG: Thêm link ảnh bìa
-        quote: "// TODO-HUNG: Thêm quote",
-        why: "// TODO-HUNG: Viết 1 câu vì sao nên đọc cuốn này"
+        cover: "/covers/money-psychology.jpg",
+        quote: "Vấn đề không nằm ở chỗ bạn kiếm bao nhiêu, mà ở chỗ bạn không thấy được tiền nó chảy đi đâu. Mấy khoản nhỏ nhỏ cộng lại nó ăn sạch mà bạn không hề hay.",
+        why: "Hiểu và làm chủ hành vi với tiền, để những đồng tiền vất vả kiếm ra thực sự ở lại với các bạn."
       }
     ] as Book[],
     pairText: "📚 Ghép với:"
@@ -83,13 +83,13 @@ export const siteContent = {
     ] as AboutValue[]
   },
   contact: {
-    title: "Kết nối", // TODO-HUNG
-    callToAction: "Để lại email để nhận thông báo bài viết mới nhất.", // TODO-HUNG
+    title: "Kết nối với Trạm",
+    callToAction: "Để lại email để nhận phân tích ý sách và góc nhìn mới nhất từ mình.",
     formEndpoint: import.meta.env.VITE_FORM_ENDPOINT || "",
     socialLinks: {
       tiktok: "https://www.tiktok.com/@tramghetamhon",
-      youtube: "", // TODO-HUNG: Thêm link youtube
-      facebook: "" // TODO-HUNG: Thêm link facebook
+      youtube: "",
+      facebook: ""
     }
   },
   footer: {
