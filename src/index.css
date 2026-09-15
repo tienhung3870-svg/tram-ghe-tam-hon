@@ -58,3 +58,56 @@ h2,
 h3 {
   margin: 0;
 }
+
+/* A11Y: Skip to content */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 10px;
+  background: var(--gold);
+  color: var(--navy);
+  padding: 8px;
+  z-index: 10000;
+  transition: top 0.2s;
+}
+.skip-to-content:focus {
+  top: 10px;
+}
+
+/* A11Y: Focus outline */
+a:focus, button:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Pillar Card Hover effect (Agent B) */
+.pillar-card {
+  position: relative;
+  overflow: hidden; /* for the ::before glow */
+}
+
+.pillar-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px; /* border thickness */
+  background: radial-gradient(
+    800px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(201, 168, 124, 0.8),
+    transparent 40%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .pillar-card:hover::before {
+    opacity: 1;
+  }
+}
+
