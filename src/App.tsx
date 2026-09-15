@@ -1,10 +1,8 @@
 import { Suspense, lazy, useEffect, useState, useRef, useCallback } from 'react'
 import './App.css'
 import SmoothScroll from './SmoothScroll'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { gsap, ScrollTrigger } from './lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
 
 // Lazy load 3D scenes
 const HeroScene = lazy(() => import('./scenes/HeroScene'))

@@ -1,11 +1,11 @@
 import { useRef, Suspense, lazy, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
+import { Environment } from '@react-three/drei'
 import * as THREE from 'three'
 
 const StarField = lazy(() => import('./StarField'))
 const GradientBg = lazy(() => import('./GradientBg'))
 
-/** Compass tick marks — 12 small cylinders around the ring */
 function TickMarks() {
   const ticks = useMemo(() => {
     const items = []
@@ -28,15 +28,13 @@ function TickMarks() {
       {ticks.map((t, i) => (
         <mesh key={i} position={[t.x, 0, t.z]} rotation={[0, 0, -t.angle]}>
           <boxGeometry args={[t.length, t.width, t.width]} />
-          <meshStandardMaterial color="#c9a87c" metalness={0.8} roughness={0.2} />
+          <meshStandardMaterial color="#c9a87c" metalness={0.9} roughness={0.25} />
         </mesh>
       ))}
     </group>
   )
 }
 
-
-/** Glow ring — slightly transparent torus with emissive */
 function GlowRing() {
   return (
     <mesh rotation={[Math.PI / 2, 0, 0]}>
@@ -58,70 +56,55 @@ function Compass() {
   const groupRef = useRef<THREE.Group>(null)
   
   useFrame((state, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.15
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.12
-    }
+    if (!groupRef.current) return
+    // Y spin
+    groupRef.current.rotation.y += delta * 0.15
+    // Float
+    groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.12
+    // Mouse tilt: max 8° ≈ 0.14 rad, lerp for smooth
+    const px = state.pointer.x
+    const py = state.pointer.y
+    groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, py * 0.14, 0.05)
+    groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, -px * 0.14, 0.05)
   })
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
-      {/* Outer glow ring */}
       <GlowRing />
-      {/* Outer Ring */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[1.5, 0.05, 16, 100]} />
-        <meshStandardMaterial color="#c9a87c" metalness={0.8} roughness={0.2} />
+        <meshStandardMaterial color="#c9a87c" metalness={0.9} roughness={0.25} />
       </mesh>
-      {/* Inner Ring */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[1.2, 0.03, 16, 100]} />
-        <meshStandardMaterial color="#c9a87c" metalness={0.8} roughness={0.2} />
+        <meshStandardMaterial color="#c9a87c" metalness={0.9} roughness={0.25} />
       </mesh>
-      {/* Tick Marks */}
       <TickMarks />
-      {/* Compass Needle — North (gold) */}
       <mesh position={[0, 0.5, 0]}>
         <coneGeometry args={[0.18, 1, 4]} />
-        <meshStandardMaterial color="#c9a87c" metalness={0.8} roughness={0.2} emissive="#c9a87c" emissiveIntensity={0.15} />
+        <meshStandardMaterial color="#c9a87c" metalness={0.9} roughness={0.25} emissive="#c9a87c" emissiveIntensity={0.15} />
       </mesh>
-      {/* Compass Needle — South (cream) */}
       <mesh position={[0, -0.5, 0]} rotation={[Math.PI, 0, 0]}>
         <coneGeometry args={[0.18, 1, 4]} />
-        <meshStandardMaterial color="#f5f0e8" metalness={0.5} roughness={0.5} />
+        <meshStandardMaterial color="#f5f0e8" metalness={0.9} roughness={0.25} />
       </mesh>
-      {/* Center Pivot — glowing */}
       <mesh>
         <sphereGeometry args={[0.15, 32, 32]} />
-        <meshStandardMaterial 
-          color="#c9a87c" 
-          metalness={0.9} 
-          roughness={0.1} 
-          emissive="#c9a87c"
-          emissiveIntensity={0.4}
-        />
+        <meshStandardMaterial color="#c9a87c" metalness={0.9} roughness={0.1} emissive="#c9a87c" emissiveIntensity={0.4} />
       </mesh>
-      {/* Inner glow sphere */}
       <mesh>
         <sphereGeometry args={[0.3, 32, 32]} />
-        <meshStandardMaterial 
-          color="#c9a87c"
-          transparent
-          opacity={0.08}
-          emissive="#c9a87c"
-          emissiveIntensity={0.6}
-        />
+        <meshStandardMaterial color="#c9a87c" transparent opacity={0.08} emissive="#c9a87c" emissiveIntensity={0.6} />
       </mesh>
     </group>
   )
 }
 
-/** Camera lerp: follows mouse ±3° for 2.5D parallax depth effect */
 function ParallaxCamera() {
   useFrame((state) => {
-    const { mouse, camera } = state
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mouse.x * 0.5, 0.05)
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, mouse.y * 0.3, 0.05)
+    const { pointer, camera } = state
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, pointer.x * 0.5, 0.05)
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, pointer.y * 0.3, 0.05)
     camera.lookAt(0, 0, 0)
   })
   return null
@@ -129,16 +112,15 @@ function ParallaxCamera() {
 
 export default function HeroScene() {
   return (
-    <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-      {/* Gradient background shader */}
+    <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 1.5]}>
       <Suspense fallback={null}>
         <GradientBg />
       </Suspense>
       <ambientLight intensity={0.4} />
       <directionalLight position={[10, 10, 5]} intensity={1.2} color="#c9a87c" />
       <pointLight position={[0, 0, 3]} intensity={0.5} color="#c9a87c" />
+      <Environment preset="night" />
       <ParallaxCamera />
-      {/* Custom star particles */}
       <Suspense fallback={null}>
         <StarField count={1500} />
       </Suspense>
