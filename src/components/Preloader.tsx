@@ -26,6 +26,15 @@ export default function Preloader() {
     }
   }, [progress])
 
+  // Safety timer so preloader never blocks rendering if no assets are tracked
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(false)
+      ScrollTrigger.refresh()
+    }, 2500)
+    return () => clearTimeout(timer)
+  }, [])
+
   if (!mounted) return null
 
   return (

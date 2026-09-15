@@ -2,6 +2,10 @@ import React, { useLayoutEffect, useRef, useState, lazy } from 'react'
 import { gsap, ScrollTrigger } from './lib/gsap'
 
 import SmoothScroll from './SmoothScroll'
+import Preloader from './components/Preloader'
+import Cursor from './components/Cursor'
+import Marquee from './components/Marquee'
+
 import Hero from './sections/Hero'
 import Pillars from './sections/Pillars'
 import Books from './sections/Books'
@@ -41,26 +45,6 @@ function LoadingSpinner() {
       <p style={{ color: 'var(--gold)', fontSize: '0.9rem', letterSpacing: '1px' }}>LOADING EXPERIENCE</p>
     </div>
   )
-}
-
-function CursorGlow() {
-  const glowRef = useRef<HTMLDivElement>(null)
-  useLayoutEffect(() => {
-    if (typeof window === 'undefined' || window.matchMedia('(hover: none)').matches) return
-    const onMove = (e: MouseEvent) => {
-      if (glowRef.current) {
-        gsap.to(glowRef.current, {
-          x: e.clientX - 150,
-          y: e.clientY - 150,
-          duration: 0.8,
-          ease: 'power3.out'
-        })
-      }
-    }
-    window.addEventListener('mousemove', onMove)
-    return () => window.removeEventListener('mousemove', onMove)
-  }, [])
-  return <div className="cursor-glow" ref={glowRef} />
 }
 
 function ScrollProgressBar() {
@@ -130,9 +114,10 @@ export default function App() {
 
   return (
     <SmoothScroll>
+      <Preloader />
+      <Cursor />
       <div className="app">
         <ScrollProgressBar />
-        <CursorGlow />
 
         <Hero
           hasWebGL={hasWebGL}
@@ -140,6 +125,8 @@ export default function App() {
           LoadingSpinner={LoadingSpinner}
           StaticFallback={StaticFallback}
         />
+
+        <Marquee />
 
         <Pillars
           hasWebGL={hasWebGL}
