@@ -1,6 +1,8 @@
 import React, { useRef, Suspense, useCallback } from 'react'
-import { gsap } from '../lib/gsap'
+import { gsap, ScrollTrigger } from '../lib/gsap'
 import { useReducedMotion } from '../hooks/useReducedMotion'
+import { useIsMobile } from '../hooks/useIsMobile'
+import { heroProgress } from '../lib/scrollState'
 import { siteContent } from '../content/site'
 
 function MagneticCTA({ href, children, ariaLabel }: { href: string; children: React.ReactNode; ariaLabel?: string }) {
@@ -92,14 +94,43 @@ interface HeroProps {
 }
 
 export default function Hero({ hasWebGL, HeroScene, LoadingSpinner, StaticFallback }: HeroProps) {
+  const sectionRef = useRef<HTMLElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
   const heroRef = useRef<HTMLDivElement>(null)
+  const isMobile = useIsMobile()
+  const reducedMotion = useReducedMotion()
 
   useStaggerReveal(titleRef)
   useHeroContentReveal(heroRef)
 
+  // Pin hero 150vh scrub, disabled on mobile or reduced-motion
+  React.useLayoutEffect(() => {
+    if (!sectionRef.current || isMobile || reducedMotion) {
+      heroProgress.current = 0
+      return
+    }
+
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top top',
+        end: '+=150%',
+        pin: true,
+        scrub: 1,
+        onUpdate: (self) => {
+          heroProgress.current = self.progress
+        }
+      })
+    })
+
+    return () => {
+      ctx.revert()
+      heroProgress.current = 0
+    }
+  }, [isMobile, reducedMotion])
+
   return (
-    <section className="scene scene-hero" id="hero">
+    <section className="scene scene-hero" id="hero" ref={sectionRef}>
       <div className="canvas-container" aria-hidden="true">
         {hasWebGL ? (
           <Suspense fallback={<LoadingSpinner />}>
