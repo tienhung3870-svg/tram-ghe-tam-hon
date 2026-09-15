@@ -210,6 +210,8 @@ h1, h2, h3, p {
 .scene-pillars {
   background-color: var(--navy);
   padding: 4rem 1rem;
+  content-visibility: auto;
+  contain-intrinsic-size: 600px;
 }
 
 .pillars-content {
