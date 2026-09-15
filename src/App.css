@@ -148,8 +148,20 @@ h1, h2, h3, p {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.1rem;
+  gap: 0;
   width: 100%;
+}
+
+.hero-line-mask {
+  display: block;
+  overflow: hidden;
+  line-height: 1.15;
+}
+
+.title-line {
+  display: block;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .hero-slogan {
@@ -502,4 +514,41 @@ h1, h2, h3, p {
   .cursor-glow {
     display: none;
   }
+  /* Disable tilt on touch */
+  .pillar-card {
+    transform: none !important;
+  }
+}
+
+/* ═══ PREFERS REDUCED MOTION ═══ */
+@media (prefers-reduced-motion: reduce) {
+  .title-line,
+  .hero-slogan,
+  .cta-btn,
+  .pillar-card,
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  .scroll-progress-bar {
+    display: none;
+  }
+  .cursor-glow {
+    display: none;
+  }
+}
+
+/* ═══ CTA MAGNETIC ═══ */
+.cta-btn {
+  will-change: transform;
+  transition: transform 0.15s ease-out, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ═══ PILLAR CARD TILT ═══ */
+.pillar-card {
+  transition: transform 0.15s ease-out, border-color 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform;
 }

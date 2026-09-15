@@ -1,4 +1,6 @@
-import { useRef, Suspense, lazy, useMemo, useEffect, useState } from 'react'
+const fs = require('fs');
+
+const code = `import { useRef, Suspense, lazy, useMemo, useEffect, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
@@ -60,7 +62,7 @@ function Compass() {
   const groupRef = useRef<THREE.Group>(null)
   const isReducedMotion = useReducedMotion()
   
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!groupRef.current) return
     const currentProgress = heroProgress.current
     
@@ -175,3 +177,6 @@ export default function HeroScene() {
     </div>
   )
 }
+`
+
+fs.writeFileSync('src/scenes/HeroScene.tsx', code);
