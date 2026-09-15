@@ -4,6 +4,7 @@ import { useReducedMotion } from '../hooks/useReducedMotion'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { heroProgress } from '../lib/scrollState'
 import { siteContent } from '../content/site'
+import SafeCanvas from '../components/SafeCanvas'
 
 function MagneticCTA({ href, children, ariaLabel }: { href: string; children: React.ReactNode; ariaLabel?: string }) {
   const ref = useRef<HTMLAnchorElement>(null)
@@ -174,9 +175,11 @@ export default function Hero({ hasWebGL, HeroScene, LoadingSpinner, StaticFallba
     <section className="scene scene-hero" id="hero" ref={sectionRef}>
       <div className="canvas-container" aria-hidden="true">
         {hasWebGL && canLoad3D ? (
-          <Suspense fallback={<LoadingSpinner />}>
-            <HeroScene />
-          </Suspense>
+          <SafeCanvas fallbackImage="/compass-fallback.webp">
+            <Suspense fallback={<LoadingSpinner />}>
+              <HeroScene />
+            </Suspense>
+          </SafeCanvas>
         ) : (
           <StaticFallback />
         )}
