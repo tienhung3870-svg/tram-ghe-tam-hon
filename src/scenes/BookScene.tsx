@@ -1,10 +1,8 @@
 import { useRef, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { gsap, ScrollTrigger } from '../lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
 
 function FloatingBook() {
   const bookRef = useRef<THREE.Group>(null)

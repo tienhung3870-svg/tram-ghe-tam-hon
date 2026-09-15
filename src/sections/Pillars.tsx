@@ -1,15 +1,37 @@
-import React, { useRef, Suspense } from 'react'
+import React, { useRef, Suspense, useCallback } from 'react'
 import { gsap } from '../lib/gsap'
 import { useSplitReveal } from '../hooks/useSplitReveal'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { siteContent } from '../content/site'
 
+function TiltCard({ children, className }: { children: React.ReactNode; className: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  const onMove = useCallback((e: React.MouseEvent) => {
+    if (!ref.current || window.matchMedia('(hover: none)').matches) return
+    const rect = ref.current.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width - 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5
+    ref.current.style.transform = `perspective(600px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) scale(1.02)`
+  }, [])
+
+  const onLeave = useCallback(() => {
+    if (ref.current) ref.current.style.transform = ''
+  }, [])
+
+  return (
+    <div ref={ref} className={className} onMouseMove={onMove} onMouseLeave={onLeave}>
+      {children}
+    </div>
+  )
+}
+
 interface PillarsProps {
   hasWebGL: boolean
   PillarScene: React.LazyExoticComponent<any>
-  LazyInView: React.FC<{children: React.ReactNode}>
+  LazyInView: React.FC<{ children: React.ReactNode }>
   LoadingSpinner: React.FC
-  AnimatedCounter: React.FC<{target: number; suffix?: string}>
+  AnimatedCounter: React.FC<{ target: number; suffix?: string }>
 }
 
 export default function Pillars({ hasWebGL, PillarScene, LazyInView, LoadingSpinner, AnimatedCounter }: PillarsProps) {
@@ -37,56 +59,33 @@ export default function Pillars({ hasWebGL, PillarScene, LazyInView, LoadingSpin
         })
       }
 
-      // Stagger pillar cards
+      // Stagger pillar cards with clip-path reveal from rescue-dot1
       const cards = pillarsRef.current?.querySelectorAll('.pillar-card')
       if (cards) {
         cards.forEach((card, i) => {
           gsap.fromTo(card,
-            { opacity: reducedMotion ? 1 : 0, y: reducedMotion ? 0 : 40, scale: reducedMotion ? 1 : 0.95 },
             {
-              opacity: 1, y: 0, scale: 1,
+              clipPath: reducedMotion ? 'inset(0% 0 0 0)' : 'inset(100% 0 0 0)',
+              opacity: reducedMotion ? 1 : 0,
+              y: reducedMotion ? 0 : 40,
+              scale: reducedMotion ? 1 : 0.95
+            },
+            {
+              clipPath: 'inset(0% 0 0 0)',
+              opacity: 1,
+              y: 0,
+              scale: 1,
               duration: 0.7,
-              delay: reducedMotion ? 0 : i * 0.15,
+              delay: reducedMotion ? 0 : i * 0.1,
               ease: 'power2.out',
               scrollTrigger: { trigger: card, start: 'top 85%', once: true }
             }
           )
         })
       }
-
-      // Parallax icon
-      if (!reducedMotion) {
-        const icons = pillarsRef.current?.querySelectorAll('.pillar-icon')
-        if (icons) {
-          icons.forEach(icon => {
-            gsap.fromTo(icon,
-              { yPercent: -10 },
-              {
-                yPercent: 10,
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: icon.closest('.pillar-card'),
-                  start: 'top bottom',
-                  end: 'bottom top',
-                  scrub: true
-                }
-              }
-            )
-          })
-        }
-      }
     })
     return () => ctx.revert()
   }, [reducedMotion])
-
-  const handlePillarPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const card = e.currentTarget
-    const rect = card.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    card.style.setProperty('--mx', `${x}px`)
-    card.style.setProperty('--my', `${y}px`)
-  }
 
   return (
     <section className="scene scene-pillars" id="pillars">
@@ -98,14 +97,16 @@ export default function Pillars({ hasWebGL, PillarScene, LazyInView, LoadingSpin
         ) : null}
       </div>
       <div className="pillars-content reveal" ref={pillarsRef}>
-        <h2 ref={pillarsTitleRef}><AnimatedCounter target={siteContent.pillars.items.length} /> {siteContent.pillars.title}</h2>
+        <h2 ref={pillarsTitleRef}>
+          <AnimatedCounter target={siteContent.pillars.items.length} /> {siteContent.pillars.title}
+        </h2>
         <div className="pillars-grid">
           {siteContent.pillars.items.map((item) => (
-            <div key={item.id} className="pillar-card glass-card" onPointerMove={handlePillarPointerMove}>
+            <TiltCard key={item.id} className="pillar-card glass-card">
               <span className="pillar-icon">{item.icon}</span>
               <h3>{item.title}</h3>
               <p>{item.description}</p>
-            </div>
+            </TiltCard>
           ))}
         </div>
       </div>

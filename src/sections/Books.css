@@ -1,0 +1,132 @@
+.scene-book {
+  position: relative;
+  background-color: #151525;
+  overflow: hidden; /* Desktop hide overflow */
+  width: 100%;
+}
+
+.book-track-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.book-track {
+  display: flex;
+  padding: 0 50vw 0 10vw; /* Start with offset, end with space */
+  gap: 10vw;
+  width: max-content;
+}
+
+.book-card-wrap {
+  position: relative;
+  width: 300px;
+  height: 400px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.book-card-inner {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(201, 168, 124, 0.2);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+  transition: background 0.3s ease;
+}
+
+.book-card-inner:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.book-info h3 {
+  color: var(--gold);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.book-author {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin-bottom: 1rem;
+}
+
+.book-desc {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.book-detail {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.close-btn {
+  margin-top: 1rem;
+  background: var(--gold);
+  color: #111;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* FLIP ACTIVE STATE */
+.book-card-wrap.is-active {
+  z-index: 50;
+}
+
+.book-card-wrap.is-active .book-card-inner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) !important;
+  width: 90vw;
+  max-width: 600px;
+  height: auto;
+  min-height: 500px;
+  background: rgba(21, 21, 37, 0.95);
+  border: 1px solid var(--gold);
+  cursor: default;
+}
+
+/* MOBILE */
+@media (max-width: 767px) {
+  .scene-book {
+    height: auto;
+  }
+  .book-track-container {
+    height: auto;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 4rem 0;
+  }
+  .book-track-container::-webkit-scrollbar {
+    display: none;
+  }
+  .book-track {
+    padding: 0 1rem;
+    gap: 1rem;
+  }
+  .book-card-wrap {
+    scroll-snap-align: center;
+    width: 80vw;
+  }
+  .book-card-wrap.is-active .book-card-inner {
+    position: fixed;
+    top: 10vh;
+    left: 5vw;
+    transform: none !important;
+    width: 90vw;
+    height: 80vh;
+    z-index: 100;
+  }
+}

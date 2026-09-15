@@ -1,18 +1,17 @@
-import { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import Lenis from 'lenis'
-import { ScrollTrigger } from './lib/gsap'
-import { gsap } from './lib/gsap'
+import { gsap, ScrollTrigger } from './lib/gsap'
+
+export let lenisInstance: Lenis | null = null
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
-  const lenisRef = useRef<Lenis | null>(null)
-
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       touchMultiplier: 2,
     })
-    lenisRef.current = lenis
+    lenisInstance = lenis
 
     // Sync Lenis with GSAP ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update)
@@ -23,7 +22,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     return () => {
       lenis.destroy()
-      lenisRef.current = null
+      lenisInstance = null
     }
   }, [])
 

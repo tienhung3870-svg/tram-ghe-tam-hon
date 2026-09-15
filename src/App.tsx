@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import React, { useLayoutEffect, useRef, useState, lazy } from 'react'
 import { gsap, ScrollTrigger } from './lib/gsap'
 
 import SmoothScroll from './SmoothScroll'
@@ -12,16 +12,16 @@ import { siteContent } from './content/site'
 import './App.css'
 
 // Lazy load scenes
-const HeroScene = React.lazy(() => import('./scenes/HeroScene'))
-const PillarScene = React.lazy(() => import('./scenes/PillarScene'))
-const BookScene = React.lazy(() => import('./scenes/BookScene'))
+const HeroScene = lazy(() => import('./scenes/HeroScene'))
+const PillarScene = lazy(() => import('./scenes/PillarScene'))
+const BookScene = lazy(() => import('./scenes/BookScene'))
 
 // Helper to check WebGL
 function detectWebGL() {
   try {
     const canvas = document.createElement('canvas')
     return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')))
-  } catch (e) {
+  } catch {
     return false
   }
 }
@@ -46,12 +46,12 @@ function LoadingSpinner() {
 function CursorGlow() {
   const glowRef = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
-    if (window.matchMedia('(hover: none)').matches) return
+    if (typeof window === 'undefined' || window.matchMedia('(hover: none)').matches) return
     const onMove = (e: MouseEvent) => {
       if (glowRef.current) {
         gsap.to(glowRef.current, {
-          x: e.clientX - 200,
-          y: e.clientY - 200,
+          x: e.clientX - 150,
+          y: e.clientY - 150,
           duration: 0.8,
           ease: 'power3.out'
         })
@@ -68,14 +68,14 @@ function ScrollProgressBar() {
   useLayoutEffect(() => {
     const onScroll = () => {
       if (!barRef.current) return
-      const scrollTop = window.scrollY
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight
-      barRef.current.style.width = `${docHeight > 0 ? (scrollTop / docHeight) * 100 : 0}%`
+      const s = window.scrollY
+      const d = document.documentElement.scrollHeight - window.innerHeight
+      barRef.current.style.width = `${d > 0 ? (s / d) * 100 : 0}%`
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-  return <div className="scroll-progress-bar" ref={barRef} style={{ position: 'fixed', top: 0, left: 0, height: '4px', background: 'var(--gold)', zIndex: 9999, transition: 'width 0.1s' }} />
+  return <div className="scroll-progress-bar" ref={barRef} />
 }
 
 function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
@@ -110,7 +110,10 @@ function LazyInView({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setInView(true); observer.disconnect() }
+      if (entry.isIntersecting) {
+        setInView(true)
+        observer.disconnect()
+      }
     }, { rootMargin: '400px' })
     if (ref.current) observer.observe(ref.current)
     return () => observer.disconnect()
@@ -131,21 +134,38 @@ export default function App() {
         <ScrollProgressBar />
         <CursorGlow />
 
-        <Hero hasWebGL={hasWebGL} HeroScene={HeroScene} LoadingSpinner={LoadingSpinner} StaticFallback={StaticFallback} />
-        
-        <Pillars hasWebGL={hasWebGL} PillarScene={PillarScene} LazyInView={LazyInView} LoadingSpinner={LoadingSpinner} AnimatedCounter={AnimatedCounter} />
+        <Hero
+          hasWebGL={hasWebGL}
+          HeroScene={HeroScene}
+          LoadingSpinner={LoadingSpinner}
+          StaticFallback={StaticFallback}
+        />
 
-        <Books hasWebGL={hasWebGL} BookScene={BookScene} LazyInView={LazyInView} LoadingSpinner={LoadingSpinner} />
+        <Pillars
+          hasWebGL={hasWebGL}
+          PillarScene={PillarScene}
+          LazyInView={LazyInView}
+          LoadingSpinner={LoadingSpinner}
+          AnimatedCounter={AnimatedCounter}
+        />
+
+        <Books
+          hasWebGL={hasWebGL}
+          BookScene={BookScene}
+          LazyInView={LazyInView}
+          LoadingSpinner={LoadingSpinner}
+        />
 
         <About />
 
         <Contact />
 
-        {/* FOOTER */}
         <footer className="site-footer reveal">
           <p>{siteContent.footer.brand} · {siteContent.footer.slogan}</p>
           <div className="social-links">
-            <a href={siteContent.contact.socialLinks.tiktok} target="_blank" rel="noopener" aria-label="TikTok">TikTok</a>
+            <a href={siteContent.contact.socialLinks.tiktok} target="_blank" rel="noopener" aria-label="TikTok">
+              TikTok
+            </a>
           </div>
         </footer>
       </div>

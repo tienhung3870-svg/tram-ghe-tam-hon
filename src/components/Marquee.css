@@ -1,0 +1,23 @@
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  background: var(--gold);
+  color: #111;
+  padding: 1rem 0;
+  white-space: nowrap;
+}
+
+.marquee-track {
+  display: flex;
+  width: 200%;
+}
+
+.marquee-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 50%;
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
