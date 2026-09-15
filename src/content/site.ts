@@ -56,7 +56,7 @@ export const siteContent = {
         title: "Sapiens — Lược sử loài người",
         author: "Yuval Noah Harari",
         cover: "/covers/sapiens.jpg",
-        quote: "Tờ giấy trong ví bạn không tự nhiên lại có giá trị. Nó có giá vì tất cả cùng tin nó có giá — tiền là thứ không hề tồn tại ngoài trí tưởng tượng nhưng lại chi phối cả thế giới.",
+        quote: "Tờ giấy trong ví bạn không tự nhiên lại có giá trị. Nó có giá vì tất cả cùng tin nó có giá.",
         why: "Nhìn thấu những trật tự tưởng tượng đang vận hành thế giới để các bạn tự do đặt câu hỏi lại mọi niềm tin cũ."
       },
       {
