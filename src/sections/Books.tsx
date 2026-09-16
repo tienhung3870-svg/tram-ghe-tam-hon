@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, Suspense } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { gsap, ScrollTrigger, Flip } from '../lib/gsap'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useReducedMotion } from '../hooks/useReducedMotion'
@@ -13,7 +13,7 @@ interface BooksProps {
   LoadingSpinner?: React.FC
 }
 
-export default function Books({ hasWebGL, BookScene, LazyInView, LoadingSpinner }: BooksProps) {
+export default function Books(_props: BooksProps = {}) {
   const isMobile = useIsMobile()
   const isReducedMotion = useReducedMotion()
   const sectionRef = useRef<HTMLElement>(null)
@@ -28,6 +28,7 @@ export default function Books({ hasWebGL, BookScene, LazyInView, LoadingSpinner 
     id: b.id,
     title: b.title,
     author: b.author,
+    cover: b.cover,
     desc: b.quote,
     pair: b.why || 'Tâm Lý Học Về Tiền',
     speed: 1 - (idx % 3) * 0.15
@@ -141,14 +142,6 @@ export default function Books({ hasWebGL, BookScene, LazyInView, LoadingSpinner 
 
   return (
     <section className="scene scene-book" id="books" ref={sectionRef}>
-      {hasWebGL && BookScene && LazyInView && LoadingSpinner && (
-        <div className="canvas-container" aria-hidden="true" style={{ opacity: 0.4 }}>
-          <Suspense fallback={<LoadingSpinner />}>
-            <LazyInView><BookScene /></LazyInView>
-          </Suspense>
-        </div>
-      )}
-
       <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
         <div style={{ textAlign: 'center', paddingTop: '3rem' }}>
           <h2
@@ -175,6 +168,14 @@ export default function Books({ hasWebGL, BookScene, LazyInView, LoadingSpinner 
                     data-speed={book.speed}
                     data-flip-id={`book-${book.id}`}
                   >
+                    <div className="book-cover-wrap">
+                      <img
+                        src={book.cover}
+                        alt={`Bìa sách ${book.title}`}
+                        className="book-cover"
+                        loading="lazy"
+                      />
+                    </div>
                     <div className="book-info">
                       <h3>{book.title}</h3>
                       <p className="book-author">{book.author}</p>

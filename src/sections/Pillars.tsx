@@ -98,7 +98,7 @@ export default function Pillars({ hasWebGL, PillarScene, LazyInView, LoadingSpin
 
   return (
     <section className="scene scene-pillars" id="pillars">
-      <div className="canvas-container" aria-hidden="true">
+      <div className="canvas-container" aria-hidden="true" style={{ opacity: 0.25 }}>
         {hasWebGL ? (
           <Suspense fallback={<LoadingSpinner />}>
             <LazyInView><PillarScene /></LazyInView>

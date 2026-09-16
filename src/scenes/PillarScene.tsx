@@ -15,7 +15,7 @@ function FloatingShape({ position, geometry, color, speed }: { position: [number
 
   return (
     <mesh ref={meshRef} position={position} geometry={geometry}>
-      <meshBasicMaterial color={color} wireframe />
+      <meshBasicMaterial color={color} wireframe transparent opacity={0.25} />
     </mesh>
   )
 }

@@ -101,6 +101,69 @@ test.describe('Visual Content Inspection', () => {
     }
   });
 
+  test('Kiểm tra mỗi thẻ sách có <img> bìa sách load thành công (naturalWidth > 0)', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.hero-title').waitFor({ state: 'visible', timeout: 5000 });
+    await page.locator('.preloader').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(500);
+
+    await page.evaluate(() => {
+      const target = document.querySelector('#books');
+      if (target) {
+        target.scrollIntoView({ behavior: 'instant', block: 'center' });
+      }
+    });
+
+    await page.waitForTimeout(1000);
+
+    const bookCovers = page.locator('#books .book-cover');
+    const count = await bookCovers.count();
+    expect(count, 'Phải có ít nhất 2 ảnh bìa sách').toBeGreaterThanOrEqual(2);
+
+    for (let i = 0; i < count; i++) {
+      const img = bookCovers.nth(i);
+      await expect(img).toBeVisible();
+
+      // Check alt attribute
+      const alt = await img.getAttribute('alt');
+      expect(alt, `Ảnh bìa ${i} phải có thuộc tính alt`).toBeTruthy();
+
+      // Check image loaded with naturalWidth > 0
+      const naturalWidth = await img.evaluate((el: HTMLImageElement) => el.naturalWidth);
+      console.log(`Book cover ${i} naturalWidth:`, naturalWidth, 'alt:', alt);
+      expect(naturalWidth, `Ảnh bìa ${i} load thành công với naturalWidth > 0`).toBeGreaterThan(0);
+    }
+
+    const authorStyles = await page.locator('#books .book-author').evaluateAll(els => els.map(el => {
+      const cs = window.getComputedStyle(el);
+      return { text: el.innerText, color: cs.color, opacity: cs.opacity };
+    }));
+    console.log('Book author styles:', JSON.stringify(authorStyles));
+
+    // WCAG contrast calculation
+    const getLuminance = (r: number, g: number, b: number) => {
+      const a = [r, g, b].map(v => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      });
+      return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+    };
+
+    for (const style of authorStyles) {
+      const match = style.color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      expect(match).toBeTruthy();
+      if (match) {
+        const [r, g, b] = [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
+        const cardBg = [13, 16, 32];
+        const l1 = getLuminance(r, g, b);
+        const l2 = getLuminance(cardBg[0], cardBg[1], cardBg[2]);
+        const contrastRatio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+        console.log(`Tác giả "${style.text}" độ tương phản: ${contrastRatio.toFixed(2)}:1 (yêu cầu >= 4.5:1)`);
+        expect(contrastRatio, `Độ tương phản của tên tác giả ${style.text} phải >= 4.5:1`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+
   test('Chụp 5 ảnh 1440 của 5 section', async ({ page }, testInfo) => {
     if (testInfo.project.name !== 'desktop_1440') return;
 
