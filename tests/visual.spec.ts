@@ -272,5 +272,35 @@ test.describe('Visual Content Inspection', () => {
       }
       console.log('Saved screenshot:', dest);
     }
+
+    // Cuộn về đầu trước khi chụp toàn trang desktop 1440
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${outDir}/fullpage_desktop_1440.png`, fullPage: true });
+    console.log('Saved fullpage desktop screenshot');
+  });
+
+  test('Chụp ảnh full page mobile 390', async ({ page }, testInfo) => {
+    if (testInfo.project.name !== 'mobile_390') return;
+    await page.goto('/');
+    await page.locator('.hero-title').waitFor({ state: 'visible', timeout: 5000 });
+    await page.locator('.preloader').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(1000);
+    const outDir = '/Users/phamtienhung/.gemini/antigravity/brain/3c3df0e1-bf3d-4a7f-9583-8ec2edf556de';
+
+    // Cuộn qua từng section để kích hoạt reveal
+    for (const sec of ['#hero', '#pillars', '#books', '#about', '#contact']) {
+      await page.evaluate((selector) => {
+        const el = document.querySelector(selector);
+        if (el) el.scrollIntoView({ behavior: 'instant', block: 'center' });
+      }, sec);
+      await page.waitForTimeout(600);
+    }
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.waitForTimeout(600);
+
+    await page.screenshot({ path: `${outDir}/fullpage_mobile_390.png`, fullPage: true });
+    await page.locator('#books').screenshot({ path: `${outDir}/section_03_books_mobile_390.png` });
+    console.log('Saved fullpage mobile 390 screenshot');
   });
 });
