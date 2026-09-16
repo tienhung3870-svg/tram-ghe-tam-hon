@@ -68,7 +68,12 @@ export default function Books(_props: BooksProps = {}) {
 
     const ctx = gsap.context(() => {
       const track = trackRef.current!
-      const getScrollAmount = () => -(track.scrollWidth - window.innerWidth)
+      // Chỉ kích hoạt pin và cuộn ngang khi nội dung track rộng hơn khung nhìn
+      if (track.scrollWidth <= window.innerWidth) {
+        return
+      }
+
+      const getScrollAmount = () => -(track.scrollWidth - window.innerWidth + 48)
 
       const tween = gsap.to(track, {
         x: getScrollAmount,
@@ -78,7 +83,7 @@ export default function Books(_props: BooksProps = {}) {
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: 'top top',
-        end: () => `+=${Math.max(track.scrollWidth - window.innerWidth, 500)}`,
+        end: () => `+=${Math.max(track.scrollWidth - window.innerWidth, 300)}`,
         pin: true,
         animation: tween,
         scrub: 1,
@@ -88,12 +93,12 @@ export default function Books(_props: BooksProps = {}) {
       gsap.utils.toArray<HTMLElement>('.book-card-inner').forEach((card) => {
         const speed = parseFloat(card.dataset.speed || '1')
         gsap.to(card, {
-          x: () => (window.innerWidth * 0.1) * (1 - speed),
+          x: () => (window.innerWidth * 0.05) * (1 - speed),
           ease: 'none',
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top top',
-            end: () => `+=${Math.max(track.scrollWidth - window.innerWidth, 500)}`,
+            end: () => `+=${Math.max(track.scrollWidth - window.innerWidth, 300)}`,
             scrub: 1,
             invalidateOnRefresh: true
           }
@@ -142,12 +147,11 @@ export default function Books(_props: BooksProps = {}) {
 
   return (
     <section className="scene scene-book" id="books" ref={sectionRef}>
-      <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
-        <div style={{ textAlign: 'center', paddingTop: '3rem' }}>
+      <div className="books-inner-container">
+        <div className="books-header">
           <h2
             ref={booksTitleRef}
             className="books-heading-kinetic"
-            style={{ color: 'var(--gold)', fontSize: '2.25rem', marginBottom: '1rem' }}
           >
             {siteContent.books.title}
           </h2>
@@ -160,7 +164,7 @@ export default function Books(_props: BooksProps = {}) {
               return (
                 <div
                   key={book.id}
-                  className={`book-card-wrap ${isActive ? 'is-active' : ''}`}
+                  className={`book-card book-card-wrap ${isActive ? 'is-active' : ''}`}
                   onClick={() => handleBookClick(book.id)}
                 >
                   <div

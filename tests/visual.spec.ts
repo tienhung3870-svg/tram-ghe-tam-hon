@@ -6,7 +6,7 @@ test.describe('Visual Content Inspection', () => {
     await page.goto('/');
     await page.locator('.hero-title').waitFor({ state: 'visible', timeout: 5000 });
     await page.locator('.preloader').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {});
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     const sections = ['#hero', '#pillars', '#books', '#about', '#contact'];
 
@@ -164,6 +164,78 @@ test.describe('Visual Content Inspection', () => {
     }
   });
 
+  test('Kiểm tra mỗi .book-card không bị cắt chữ (scrollHeight <= clientHeight) và không tràn lề trái (left >= 0)', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.hero-title').waitFor({ state: 'visible', timeout: 5000 });
+    await page.locator('.preloader').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(500);
+
+    // Cuộn tới #books
+    await page.evaluate(() => {
+      const el = document.querySelector('#books');
+      if (el) el.scrollIntoView({ behavior: 'instant', block: 'start' });
+    });
+    await page.waitForTimeout(500);
+
+    const bookCards = page.locator('#books .book-card');
+    const count = await bookCards.count();
+    expect(count, 'Phải có ít nhất 2 thẻ sách có class .book-card').toBeGreaterThanOrEqual(2);
+
+    for (let i = 0; i < count; i++) {
+      const card = bookCards.nth(i);
+      await expect(card).toBeVisible();
+      const metrics = await card.evaluate((el: HTMLElement) => {
+        const rect = el.getBoundingClientRect();
+        return {
+          scrollHeight: el.scrollHeight,
+          clientHeight: el.clientHeight,
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height
+        };
+      });
+      console.log(`Thẻ sách ${i}:`, metrics);
+      expect(
+        metrics.scrollHeight,
+        `Thẻ ${i} không bị cắt chữ: scrollHeight (${metrics.scrollHeight}) <= clientHeight (${metrics.clientHeight})`
+      ).toBeLessThanOrEqual(metrics.clientHeight);
+      expect(
+        metrics.left,
+        `Thẻ ${i} không bị tràn lề trái: left (${metrics.left}) >= 0`
+      ).toBeGreaterThanOrEqual(0);
+    }
+
+    // Kiểm tra khoảng cách: giữa tiêu đề và thẻ sách, giữa thẻ sách và #about không quá 1/2 màn hình
+    const spacing = await page.evaluate(() => {
+      const title = document.querySelector('#books h2');
+      const firstCard = document.querySelector('#books .book-card');
+      const booksSection = document.querySelector('#books');
+      const aboutSection = document.querySelector('#about');
+      const vh = window.innerHeight;
+
+      const titleBottom = title ? title.getBoundingClientRect().bottom : 0;
+      const cardTop = firstCard ? firstCard.getBoundingClientRect().top : 0;
+      const cardBottom = firstCard ? firstCard.getBoundingClientRect().bottom : 0;
+      const aboutTop = aboutSection ? aboutSection.getBoundingClientRect().top : 0;
+
+      return {
+        gapTitleToCard: cardTop - titleBottom,
+        gapCardToAbout: aboutTop - cardBottom,
+        maxAllowed: vh * 0.5
+      };
+    });
+    console.log('Khoảng trống đo được:', spacing);
+    expect(
+      spacing.gapTitleToCard,
+      `Khoảng trống giữa tiêu đề và thẻ (${spacing.gapTitleToCard}px) không quá 1/2 màn hình (${spacing.maxAllowed}px)`
+    ).toBeLessThanOrEqual(spacing.maxAllowed);
+    expect(
+      spacing.gapCardToAbout,
+      `Khoảng trống giữa thẻ sách và #about (${spacing.gapCardToAbout}px) không quá 1/2 màn hình (${spacing.maxAllowed}px)`
+    ).toBeLessThanOrEqual(spacing.maxAllowed);
+  });
+
   test('Chụp 5 ảnh 1440 của 5 section', async ({ page }, testInfo) => {
     if (testInfo.project.name !== 'desktop_1440') return;
 
@@ -193,7 +265,11 @@ test.describe('Visual Content Inspection', () => {
       await page.waitForTimeout(1200);
 
       const dest = `${outDir}/${sec.file}`;
-      await page.screenshot({ path: dest });
+      if (sec.id === '#books') {
+        await page.locator('#books').screenshot({ path: dest });
+      } else {
+        await page.screenshot({ path: dest });
+      }
       console.log('Saved screenshot:', dest);
     }
   });
