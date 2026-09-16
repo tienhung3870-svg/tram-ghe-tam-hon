@@ -59,6 +59,11 @@ h3 {
   margin: 0;
 }
 
+h2,
+h2 span {
+  overflow: visible !important;
+}
+
 /* A11Y: Skip to content */
 .skip-to-content {
   position: absolute;

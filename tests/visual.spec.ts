@@ -236,6 +236,84 @@ test.describe('Visual Content Inspection', () => {
     ).toBeLessThanOrEqual(spacing.maxAllowed);
   });
 
+  test('Kiểm tra mỗi h2 trong #books #pillars #about #contact không bị cắt chữ (scrollHeight so với clientHeight lệch không quá 2px)', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.hero-title').waitFor({ state: 'visible', timeout: 5000 });
+    await page.locator('.preloader').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(500);
+
+    const headingSelectors = [
+      { section: '#books', selector: '#books h2' },
+      { section: '#pillars', selector: '#pillars h2' },
+      { section: '#about', selector: '#about h2' },
+      { section: '#contact', selector: '#contact h2' }
+    ];
+
+    for (const item of headingSelectors) {
+      // Cuộn tới section để kích hoạt animation / kinetic typography
+      await page.evaluate((sec) => {
+        const el = document.querySelector(sec);
+        if (el) el.scrollIntoView({ behavior: 'instant', block: 'center' });
+      }, item.section);
+      await page.waitForTimeout(800);
+
+      const h2 = page.locator(item.selector);
+      await expect(h2).toBeVisible();
+
+      // Kiểm tra h2: scrollHeight vs clientHeight lệch không quá 2px, không bị overflow:hidden
+      const h2Metrics = await h2.evaluate((el: HTMLElement) => {
+        const cs = window.getComputedStyle(el);
+        return {
+          text: el.innerText.trim(),
+          scrollHeight: el.scrollHeight,
+          clientHeight: el.clientHeight,
+          diff: Math.abs(el.scrollHeight - el.clientHeight),
+          overflow: cs.overflow,
+          overflowY: cs.overflowY
+        };
+      });
+
+      console.log(`Heading ${item.selector}:`, h2Metrics);
+      expect(
+        h2Metrics.diff,
+        `Tiêu đề ${item.selector} ("${h2Metrics.text}"): scrollHeight (${h2Metrics.scrollHeight}) so với clientHeight (${h2Metrics.clientHeight}) lệch không quá 2px (thực tế lệch ${h2Metrics.diff}px)`
+      ).toBeLessThanOrEqual(2);
+      expect(h2Metrics.overflow, `Tiêu đề ${item.selector} không được có overflow: hidden`).not.toBe('hidden');
+      expect(h2Metrics.overflowY, `Tiêu đề ${item.selector} không được có overflow-y: hidden`).not.toBe('hidden');
+
+      // Kiểm tra mọi thẻ con (kể cả span từ useSplitReveal / kinetic typography):
+      // Bỏ mọi overflow:hidden đang cắt chữ, scrollHeight không vượt clientHeight quá 2px
+      const childSpans = await h2.locator('span').evaluateAll((spans) => {
+        return spans.map(s => {
+          const cs = window.getComputedStyle(s);
+          return {
+            text: s.innerText,
+            scrollHeight: s.scrollHeight,
+            clientHeight: s.clientHeight,
+            diff: Math.abs(s.scrollHeight - s.clientHeight),
+            overflow: cs.overflow,
+            overflowY: cs.overflowY
+          };
+        });
+      });
+
+      for (const sm of childSpans) {
+        expect(
+          sm.overflow,
+          `Khung chữ "${sm.text}" trong ${item.selector} không được có overflow: hidden đang cắt chữ`
+        ).not.toBe('hidden');
+        expect(
+          sm.overflowY,
+          `Khung chữ "${sm.text}" trong ${item.selector} không được có overflow-y: hidden đang cắt chữ`
+        ).not.toBe('hidden');
+        expect(
+          sm.diff,
+          `Khung chữ "${sm.text}" trong ${item.selector}: scrollHeight (${sm.scrollHeight}) so với clientHeight (${sm.clientHeight}) lệch quá 2px (${sm.diff}px)`
+        ).toBeLessThanOrEqual(2);
+      }
+    }
+  });
+
   test('Chụp 5 ảnh 1440 của 5 section', async ({ page }, testInfo) => {
     if (testInfo.project.name !== 'desktop_1440') return;
 

@@ -28,6 +28,9 @@
 
 .contact-content h2 {
   font-size: 2.5rem;
+  line-height: 1.35;
+  padding-bottom: 0.35rem;
+  overflow: visible;
   margin-bottom: 1rem;
   color: var(--gold);
 }

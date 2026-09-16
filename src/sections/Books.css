@@ -18,6 +18,8 @@
 .books-header {
   text-align: center;
   margin-bottom: 2rem;
+  overflow: visible;
+  padding-bottom: 0.5rem;
 }
 
 .book-track-container {
@@ -210,8 +212,18 @@
 /* ═══ KINETIC TYPOGRAPHY ═══ */
 .books-heading-kinetic {
   display: inline-block;
+  font-size: 2.25rem;
+  line-height: 1.5;
+  padding: 0.25rem 0.5rem 0.75rem;
+  overflow: visible !important;
   will-change: letter-spacing, font-weight;
   transition: text-shadow 0.3s ease;
+}
+
+.books-heading-kinetic span {
+  overflow: visible !important;
+  line-height: inherit !important;
+  vertical-align: baseline !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -23,11 +23,14 @@ export function useSplitReveal(ref: React.RefObject<HTMLElement | null>) {
       wordSpan.style.display = 'inline-block'
       wordSpan.style.overflow = 'hidden'
       wordSpan.style.verticalAlign = 'top'
+      wordSpan.style.paddingBottom = '0.35em'
+      wordSpan.style.lineHeight = '1.4'
 
       const innerSpan = document.createElement('span')
       innerSpan.style.display = 'inline-block'
       innerSpan.innerText = word + '\u00A0'
       innerSpan.className = 'reveal-word'
+      innerSpan.style.paddingBottom = '0.15em'
       
       wordSpan.appendChild(innerSpan)
       el.appendChild(wordSpan)
@@ -47,6 +50,14 @@ export function useSplitReveal(ref: React.RefObject<HTMLElement | null>) {
             trigger: el,
             start: 'top 85%',
             once: true
+          },
+          onComplete: () => {
+            wordElements.forEach((w) => {
+              const parent = w.parentElement
+              if (parent) {
+                parent.style.overflow = 'visible'
+              }
+            })
           }
         }
       )
