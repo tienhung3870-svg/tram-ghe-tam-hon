@@ -130,3 +130,18 @@
     z-index: 100;
   }
 }
+
+/* ═══ KINETIC TYPOGRAPHY ═══ */
+.books-heading-kinetic {
+  display: inline-block;
+  will-change: letter-spacing, font-weight;
+  transition: text-shadow 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .books-heading-kinetic {
+    letter-spacing: normal !important;
+    font-weight: 700 !important;
+  }
+}
+

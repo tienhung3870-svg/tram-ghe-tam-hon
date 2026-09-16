@@ -33,6 +33,35 @@ export default function Books({ hasWebGL, BookScene, LazyInView, LoadingSpinner 
     speed: 1 - (idx % 3) * 0.15
   }))
 
+  // Kinetic typography: heading #books changes weight and letter-spacing with scroll scrub
+  useEffect(() => {
+    if (isReducedMotion || !sectionRef.current || !booksTitleRef.current) return
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        booksTitleRef.current,
+        {
+          letterSpacing: '-0.02em',
+          fontWeight: 400
+        },
+        {
+          letterSpacing: '0.12em',
+          fontWeight: 800,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 85%',
+            end: 'top 20%',
+            scrub: 1,
+            invalidateOnRefresh: true
+          }
+        }
+      )
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [isReducedMotion])
+
   useEffect(() => {
     if (isMobile || isReducedMotion || !sectionRef.current || !trackRef.current) return
 
@@ -122,7 +151,11 @@ export default function Books({ hasWebGL, BookScene, LazyInView, LoadingSpinner 
 
       <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
         <div style={{ textAlign: 'center', paddingTop: '3rem' }}>
-          <h2 ref={booksTitleRef} style={{ color: 'var(--gold)', fontSize: '2.25rem', marginBottom: '1rem' }}>
+          <h2
+            ref={booksTitleRef}
+            className="books-heading-kinetic"
+            style={{ color: 'var(--gold)', fontSize: '2.25rem', marginBottom: '1rem' }}
+          >
             {siteContent.books.title}
           </h2>
         </div>

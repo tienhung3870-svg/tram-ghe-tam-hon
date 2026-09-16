@@ -12,11 +12,19 @@ function TiltCard({ children, className }: { children: React.ReactNode; classNam
     const rect = ref.current.getBoundingClientRect()
     const x = (e.clientX - rect.left) / rect.width - 0.5
     const y = (e.clientY - rect.top) / rect.height - 0.5
+    const px = e.clientX - rect.left
+    const py = e.clientY - rect.top
     ref.current.style.transform = `perspective(600px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) scale(1.02)`
+    ref.current.style.setProperty('--mx', `${px}px`)
+    ref.current.style.setProperty('--my', `${py}px`)
   }, [])
 
   const onLeave = useCallback(() => {
-    if (ref.current) ref.current.style.transform = ''
+    if (ref.current) {
+      ref.current.style.transform = ''
+      ref.current.style.removeProperty('--mx')
+      ref.current.style.removeProperty('--my')
+    }
   }, [])
 
   return (
@@ -78,6 +86,7 @@ export default function Pillars({ hasWebGL, PillarScene, LazyInView, LoadingSpin
               duration: 0.7,
               delay: reducedMotion ? 0 : i * 0.1,
               ease: 'power2.out',
+              clearProps: 'clipPath',
               scrollTrigger: { trigger: card, start: 'top 85%', once: true }
             }
           )
@@ -101,8 +110,14 @@ export default function Pillars({ hasWebGL, PillarScene, LazyInView, LoadingSpin
           <AnimatedCounter target={siteContent.pillars.items.length} /> {siteContent.pillars.title}
         </h2>
         <div className="pillars-grid">
-          {siteContent.pillars.items.map((item) => (
-            <TiltCard key={item.id} className="pillar-card glass-card">
+          {siteContent.pillars.items.map((item, idx) => (
+            <TiltCard
+              key={item.id}
+              className={`pillar-card glass-card ${idx === 0 ? 'bento-large' : 'bento-small'}`}
+            >
+              <span className="glow-particle particle-1" aria-hidden="true" />
+              <span className="glow-particle particle-2" aria-hidden="true" />
+              <span className="glow-particle particle-3" aria-hidden="true" />
               <span className="pillar-icon">{item.icon}</span>
               <h3>{item.title}</h3>
               <p>{item.description}</p>
