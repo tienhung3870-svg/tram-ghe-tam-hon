@@ -136,7 +136,7 @@ export default function Hero({ hasWebGL, HeroScene, LoadingSpinner, StaticFallba
     // Safety timeout in case window load already fired or takes too long
     const timer = setTimeout(() => {
       setCanLoad3D(true)
-    }, 1200)
+    }, 300)
 
     return () => {
       window.removeEventListener('load', onLoad)
@@ -145,7 +145,7 @@ export default function Hero({ hasWebGL, HeroScene, LoadingSpinner, StaticFallba
     }
   }, [])
 
-  // Pin hero 150vh scrub, disabled on mobile or reduced-motion
+  // Pin hero 40vh scrub, disabled on mobile or reduced-motion
   React.useLayoutEffect(() => {
     if (!sectionRef.current || isMobile || reducedMotion) {
       heroProgress.current = 0
@@ -156,7 +156,7 @@ export default function Hero({ hasWebGL, HeroScene, LoadingSpinner, StaticFallba
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: 'top top',
-        end: '+=150%',
+        end: '+=40%',
         pin: true,
         scrub: 1,
         onUpdate: (self) => {

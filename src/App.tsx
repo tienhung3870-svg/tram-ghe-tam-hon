@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef, useState, lazy, Suspense } from 'react'
-import { gsap, ScrollTrigger } from './lib/gsap'
+import { gsap } from './lib/gsap'
 
 import SmoothScroll from './SmoothScroll'
 import Cursor from './components/Cursor'
@@ -66,27 +66,33 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
   const ref = useRef<HTMLSpanElement>(null)
   useLayoutEffect(() => {
     if (!ref.current) return
+    const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (isReduced) {
+      if (ref.current) ref.current.textContent = `${target}${suffix}`
+      return
+    }
     const ctx = gsap.context(() => {
       const obj = { val: 0 }
-      ScrollTrigger.create({
-        trigger: ref.current,
-        start: 'top 80%',
-        once: true,
-        onEnter: () => {
-          gsap.to(obj, {
-            val: target,
-            duration: 1.5,
-            ease: 'power2.out',
-            onUpdate: () => {
-              if (ref.current) ref.current.textContent = `${Math.round(obj.val)}${suffix}`
-            }
-          })
+      gsap.to(obj, {
+        val: target,
+        duration: 0.8,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: ref.current,
+          start: 'top 95%',
+          once: true
+        },
+        onUpdate: () => {
+          if (ref.current) ref.current.textContent = `${Math.round(obj.val)}${suffix}`
+        },
+        onComplete: () => {
+          if (ref.current) ref.current.textContent = `${target}${suffix}`
         }
       })
     })
     return () => ctx.revert()
   }, [target, suffix])
-  return <span ref={ref}>0{suffix}</span>
+  return <span ref={ref} className="animated-counter">0{suffix}</span>
 }
 
 function LazyInView({ children }: { children: React.ReactNode }) {

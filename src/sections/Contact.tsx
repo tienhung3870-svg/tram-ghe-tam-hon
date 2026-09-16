@@ -61,7 +61,7 @@ export default function Contact() {
 
   return (
     <section className="scene scene-contact" id="contact">
-      <div className="contact-content reveal">
+      <div className="contact-content">
         <h2>{siteContent.contact.title}</h2>
         <p>{siteContent.contact.callToAction}</p>
         

@@ -209,9 +209,7 @@ h1, h2, h3, p {
 /* ═══ PILLARS SECTION ═══ */
 .scene-pillars {
   background-color: var(--navy);
-  padding: 5rem 1rem;
-  content-visibility: auto;
-  contain-intrinsic-size: 600px;
+  padding: 4rem 1rem;
   overflow: hidden;
   position: relative;
 }
@@ -467,6 +465,13 @@ h1, h2, h3, p {
   max-width: 800px;
   margin: 0 auto;
   text-align: center;
+  background: rgba(13, 16, 32, 0.75);
+  border: 1px solid rgba(201, 168, 124, 0.25);
+  border-radius: 1.5rem;
+  padding: 3rem 2.5rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
 .about-content h2 {
@@ -535,10 +540,9 @@ h1, h2, h3, p {
   text-decoration: underline;
 }
 
-/* ═══ SCROLL REVEAL (initial state — GSAP animates to visible) ═══ */
+/* ═══ SCROLL REVEAL (GSAP manages animation dynamically) ═══ */
 .reveal {
-  opacity: 0;
-  transform: translateY(40px);
+  will-change: opacity, transform;
 }
 
 /* ═══ CURSOR GLOW ═══ */

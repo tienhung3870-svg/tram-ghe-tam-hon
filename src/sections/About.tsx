@@ -14,39 +14,16 @@ export default function About() {
 
   React.useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // About text scrub
-      if (aboutTextRef.current && !reducedMotion) {
-        const lines = aboutTextRef.current.querySelectorAll('p')
-        lines.forEach(line => {
-          gsap.fromTo(line, 
-            { opacity: 0.15 },
-            {
-              opacity: 1,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: line,
-                start: 'top 80%',
-                end: 'bottom 60%',
-                scrub: true
-              }
-            }
-          )
-        })
-      }
-
-      const revealEls = aboutRef.current?.querySelectorAll('.reveal')
-      if (revealEls) {
-        revealEls.forEach((el) => {
-          gsap.fromTo(el,
-            { opacity: reducedMotion ? 1 : 0, y: reducedMotion ? 0 : 50 },
-            {
-              opacity: 1, y: 0,
-              duration: 0.9,
-              ease: 'power3.out',
-              scrollTrigger: { trigger: el, start: 'top 85%', once: true }
-            }
-          )
-        })
+      if (aboutRef.current) {
+        gsap.fromTo(aboutRef.current,
+          { opacity: reducedMotion ? 1 : 0, y: reducedMotion ? 0 : 30 },
+          {
+            opacity: 1, y: 0,
+            duration: 0.8,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: aboutRef.current, start: 'top 85%', once: true }
+          }
+        )
       }
     })
     return () => ctx.revert()
@@ -54,7 +31,7 @@ export default function About() {
 
   return (
     <section className="scene scene-about" id="about">
-      <div className="about-content reveal" ref={aboutRef}>
+      <div className="about-content" ref={aboutRef}>
         <h2 ref={aboutTitleRef}>{siteContent.about.title}</h2>
         <div ref={aboutTextRef}>
           {siteContent.about.paragraphs.map((p, idx) => (

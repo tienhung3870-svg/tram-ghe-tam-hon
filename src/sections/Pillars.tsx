@@ -43,7 +43,7 @@ interface PillarsProps {
 }
 
 export default function Pillars({ hasWebGL, PillarScene, LazyInView, LoadingSpinner, AnimatedCounter }: PillarsProps) {
-  const pillarsTitleRef = useRef<HTMLHeadingElement>(null)
+  const pillarsTitleRef = useRef<HTMLSpanElement>(null)
   const pillarsRef = useRef<HTMLDivElement>(null)
   const reducedMotion = useReducedMotion()
 
@@ -105,9 +105,12 @@ export default function Pillars({ hasWebGL, PillarScene, LazyInView, LoadingSpin
           </Suspense>
         ) : null}
       </div>
-      <div className="pillars-content reveal" ref={pillarsRef}>
-        <h2 ref={pillarsTitleRef}>
-          <AnimatedCounter target={siteContent.pillars.items.length} /> {siteContent.pillars.title}
+      <div className="pillars-content" ref={pillarsRef}>
+        <h2>
+          <AnimatedCounter target={siteContent.pillars.items.length} />{' '}
+          <span ref={pillarsTitleRef} className="pillars-title-text">
+            {siteContent.pillars.title}
+          </span>
         </h2>
         <div className="pillars-grid">
           {siteContent.pillars.items.map((item, idx) => (

@@ -31,7 +31,7 @@ export default function Preloader() {
     const timer = setTimeout(() => {
       setMounted(false)
       ScrollTrigger.refresh()
-    }, 2500)
+    }, 800)
     return () => clearTimeout(timer)
   }, [])
 
