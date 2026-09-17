@@ -22,15 +22,19 @@ export function useSplitReveal(ref: React.RefObject<HTMLElement | null>) {
       const wordSpan = document.createElement('span')
       wordSpan.style.display = 'inline-block'
       wordSpan.style.overflow = 'hidden'
-      wordSpan.style.verticalAlign = 'top'
-      wordSpan.style.paddingBottom = '0.35em'
-      wordSpan.style.lineHeight = '1.4'
+      wordSpan.style.verticalAlign = 'baseline'
+      wordSpan.style.paddingBottom = '0'
+      wordSpan.style.lineHeight = 'inherit'
+      wordSpan.style.fontSize = 'inherit'
 
       const innerSpan = document.createElement('span')
       innerSpan.style.display = 'inline-block'
       innerSpan.innerText = word + '\u00A0'
       innerSpan.className = 'reveal-word'
-      innerSpan.style.paddingBottom = '0.15em'
+      innerSpan.style.paddingBottom = '0'
+      innerSpan.style.verticalAlign = 'baseline'
+      innerSpan.style.lineHeight = 'inherit'
+      innerSpan.style.fontSize = 'inherit'
       
       wordSpan.appendChild(innerSpan)
       el.appendChild(wordSpan)

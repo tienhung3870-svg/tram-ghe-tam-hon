@@ -236,6 +236,59 @@ test.describe('Visual Content Inspection', () => {
     ).toBeLessThanOrEqual(spacing.maxAllowed);
   });
 
+  test('Kiểm tra mọi span con trong #books h2 phải có cùng fontSize và cùng offsetTop (lệch > 2px là ĐỎ)', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.hero-title').waitFor({ state: 'visible', timeout: 5000 });
+    await page.locator('.preloader').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(500);
+
+    // Cuộn tới #books để kích hoạt animation / scrub
+    await page.evaluate(() => {
+      const el = document.querySelector('#books');
+      if (el) el.scrollIntoView({ behavior: 'instant', block: 'center' });
+    });
+    await page.waitForTimeout(1000);
+
+    const spansData = await page.evaluate(() => {
+      const h2 = document.querySelector('#books h2');
+      if (!h2) return [];
+      const spans = Array.from(h2.querySelectorAll('span'));
+      return spans.map(s => {
+        const cs = window.getComputedStyle(s);
+        return {
+          text: s.innerText.trim(),
+          className: s.className,
+          fontSize: parseFloat(cs.fontSize),
+          offsetTop: s.offsetTop,
+          lineHeight: cs.lineHeight,
+          verticalAlign: cs.verticalAlign
+        };
+      });
+    });
+
+    console.log('Spans data in #books h2:', JSON.stringify(spansData, null, 2));
+    expect(spansData.length, 'Phải có các span con trong #books h2').toBeGreaterThan(0);
+
+    const firstFontSize = spansData[0].fontSize;
+    const firstOffsetTop = spansData[0].offsetTop;
+
+    for (let i = 0; i < spansData.length; i++) {
+      const s = spansData[i];
+      const fontDiff = Math.abs(s.fontSize - firstFontSize);
+      const topDiff = Math.abs(s.offsetTop - firstOffsetTop);
+
+      expect(
+        fontDiff,
+        `Span "${s.text}" [${i}] có fontSize (${s.fontSize}px) khác với span đầu (${firstFontSize}px)`
+      ).toBeLessThanOrEqual(0.5);
+
+      expect(
+        topDiff,
+        `Span "${s.text}" [${i}] có offsetTop (${s.offsetTop}px) lệch so với span đầu (${firstOffsetTop}px) vượt quá 2px (lệch ${topDiff}px)`
+      ).toBeLessThanOrEqual(2);
+    }
+  });
+
   test('Kiểm tra mỗi h2 trong #books #pillars #about #contact không bị cắt chữ (scrollHeight so với clientHeight lệch không quá 2px)', async ({ page }) => {
     await page.goto('/');
     await page.locator('.hero-title').waitFor({ state: 'visible', timeout: 5000 });
